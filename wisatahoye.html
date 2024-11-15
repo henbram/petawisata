@@ -1,0 +1,3210 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/L.Control.Locate.min.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/MarkerCluster.css">
+        <link rel="stylesheet" href="css/MarkerCluster.Default.css">
+        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title>PETA PERSEBARAN WISATA KABUPATEN GUNUNG KIDUL, PROVINSI DAERAH ISTIMEWA YOGYAKARTA</title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/L.Control.Locate.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="js/leaflet.markercluster.js"></script>
+        <script src="data/ADMINISTRASIDESA_AR_25K_1.js"></script>
+        <script src="data/PERSEBARANWISATAGUNUNGKIDULPROVINSIDIY_2.js"></script>
+        <script src="data/KULINER_3.js"></script>
+        <script src="data/PENGINAPAN_4.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        })
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // add class to format popup if it contains media
+		function addClassToPopupIfMedia(content, popup) {
+			var tempDiv = document.createElement('div');
+			tempDiv.innerHTML = content;
+			if (tempDiv.querySelector('td img')) {
+				popup._contentNode.classList.add('media');
+					// Delay to force the redraw
+					setTimeout(function() {
+						popup.update();
+					}, 10);
+			} else {
+				popup._contentNode.classList.remove('media');
+			}
+		}
+        var title = new L.Control({'position':'topright'});
+        title.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info');
+            this.update();
+            return this._div;
+        };
+        title.update = function () {
+            this._div.innerHTML = '<h2>PETA PERSEBARAN WISATA KABUPATEN GUNUNG KIDUL, PROVINSI DAERAH ISTIMEWA YOGYAKARTA</h2>';
+        };
+        title.addTo(map);
+        var abstract = new L.Control({'position':'topright'});
+        abstract.onAdd = function (map) {
+            this._div = L.DomUtil.create('div',
+            'leaflet-control abstract');
+            this._div.id = 'abstract'
+
+                abstract.show();
+                return this._div;
+            };
+            abstract.show = function () {
+                this._div.classList.remove("abstract");
+                this._div.classList.add("abstractUncollapsed");
+                this._div.innerHTML = 'Berikut Peta Persebaran Wisata Kabupaten Gunung Kidul, Provinsi DIY';
+        };
+        abstract.addTo(map);
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'feet',
+            secondaryLengthUnit: 'miles',
+            primaryAreaUnit: 'sqfeet',
+            secondaryAreaUnit: 'sqmiles'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+            if (bounds_group.getLayers().length) {
+                map.fitBounds(bounds_group.getBounds());
+            }
+            map.setMaxBounds(map.getBounds());
+        }
+        map.createPane('pane_OSMStandard_0');
+        map.getPane('pane_OSMStandard_0').style.zIndex = 400;
+        var layer_OSMStandard_0 = L.tileLayer('http://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            pane: 'pane_OSMStandard_0',
+            opacity: 1.0,
+            attribution: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors, CC-BY-SA</a>',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_OSMStandard_0;
+        map.addLayer(layer_OSMStandard_0);
+        function pop_ADMINISTRASIDESA_AR_25K_1(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SHAPE_Area'] !== null ? autolinker.link(feature.properties['SHAPE_Area'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_ADMINISTRASIDESA_AR_25K_1_0(feature) {
+            switch(String(feature.properties['NAMOBJ'])) {
+                case 'Baleharjo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(40,205,25,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Balong':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(37,221,114,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Banaran':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(193,133,236,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Bandung':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(20,86,228,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Banjarejo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(202,92,80,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Banyusoco':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(216,234,16,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Basuhan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(219,88,95,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Bedoyo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(178,233,27,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Beji':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(105,101,223,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Bejiharjo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(203,100,201,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Bendung':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(237,234,86,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Bendungan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(205,108,78,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Bleberan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(69,207,62,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Bogem':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(200,45,138,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Bohol':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(228,92,146,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Botodayaan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(200,132,38,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Bulurejo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(52,62,212,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Bunder':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(81,237,162,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Burikan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(134,204,28,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Candirejo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(38,200,141,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Dadapayu':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(206,191,75,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Dengok':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(42,156,217,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Dlingo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(240,112,123,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Dukuh':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(124,139,223,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Duwet':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(220,47,168,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Gading':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(29,238,39,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Gari':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(139,89,226,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Gayamharjo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(121,227,137,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Gebangharjo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(41,201,148,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Gedangrejo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(124,215,200,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Gedong':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(121,137,211,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Genjahan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(38,203,101,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Gentan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(188,222,108,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Gesikan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(148,228,67,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Getas':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(120,221,107,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Giriasih':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(73,152,226,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Giricahyo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(239,232,94,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Giriharjo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(125,229,184,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Girijati':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(57,209,27,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Girikerto':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(221,132,80,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Girimulyo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(153,137,229,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Giring':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(201,50,168,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Giripanggung':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(228,237,62,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Giripurwo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(216,45,159,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Girisekar':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(219,221,109,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Girisuko':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(221,208,65,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Giritirto':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(224,125,161,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Giriwungu':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(113,71,228,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Glingganggang':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(110,203,213,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Gombong':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(131,218,56,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Grogol':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(158,23,231,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Hargomulyo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(233,85,206,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Hargosari':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(182,108,216,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Jambakan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(98,121,205,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Jarum':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(76,222,107,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Jatiayu':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(26,204,217,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Jatigarang':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(62,78,220,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Jatimulyo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(66,223,94,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Jepitu':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(221,36,33,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Jerukmudel':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(206,79,100,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Jetis':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(118,68,235,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Jogoprayan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(147,222,128,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Joho':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(238,190,67,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Jurangjero':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(138,207,58,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Kadilanggon':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(223,235,135,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Kaligayam':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(162,94,230,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Kalitekuk':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(69,171,205,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Kampung':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(125,55,217,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Kanigoro':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(210,65,218,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Karangasem':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(206,237,30,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Karangawen':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(231,109,133,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Karangduwet':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(106,218,138,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Karangmojo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(73,235,130,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Karangrejek':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(26,229,138,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Karangsari':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(24,207,189,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Karangtengah':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(60,168,210,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Karangturi':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(91,228,153,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Karangwuni':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(16,92,232,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Katongan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(16,219,114,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Kedungkeris':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(236,153,122,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Kedungpoh':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(211,151,112,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Kelor':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(134,216,236,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Kemadang':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(204,49,41,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Kemejing':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(166,231,54,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Kemiri':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(237,169,139,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Kenteng':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(204,54,169,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Kepek':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(18,24,209,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Kepuhsari':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(223,126,181,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Kerten':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(120,52,221,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Kragilan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(218,22,166,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Krajan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(129,221,89,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Krambilsawit':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(106,207,38,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Logandeng':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(198,232,45,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Mangunan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(89,74,220,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Melikan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(48,200,154,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Mertelu':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(235,149,36,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Monggol':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(94,234,129,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Mulusan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(193,41,207,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Muntuk':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(240,78,227,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Muulo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(211,178,116,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Natah':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(204,53,196,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Nengahan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(173,63,203,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Ngalang':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(101,145,207,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Ngandong':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(223,125,26,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Ngawis':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(236,213,112,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Ngawu':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(207,164,34,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Ngeposari':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(84,210,95,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Ngerangan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(22,200,129,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Ngestirejo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(110,223,123,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Ngipak':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(74,90,210,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Nglanggeran':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(227,84,206,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Nglegi':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(214,113,237,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Ngleri':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(173,82,203,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Nglindur':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(218,128,26,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Nglipar':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(42,225,39,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Ngloro':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(102,224,224,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Ngoro-Oro':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(68,207,46,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Ngunut':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(221,26,84,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Pagutan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(208,93,95,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Pampang':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(223,109,159,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Pancarejo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(64,180,203,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Paranggupito':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(222,180,30,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Parangtritis':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(232,89,60,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Pasekan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(220,151,41,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Patuk':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(68,138,213,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Pengkok':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(189,209,125,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Pengkol':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(188,215,92,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Petir':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(30,205,211,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Petirsari':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(100,231,24,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Pilangrejo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(187,20,209,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Piyaman':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(127,240,71,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Planjan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(130,216,132,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Playen':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(204,35,114,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Plembutan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(83,236,231,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Ponjong':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(146,99,239,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Pringombo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(40,40,228,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Pucanganom':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(216,57,219,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Pucung':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(201,85,222,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Pulutan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(68,126,218,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Punduhsari':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(32,74,201,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Pundungsari':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(131,39,212,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Purwodadi':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(131,222,13,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Putat':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(240,25,97,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Rejosari':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(231,67,212,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Salam':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(184,232,89,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Sambirejo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(210,71,89,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Sampang':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(87,179,222,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Sawahan':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(96,230,138,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Selang':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(122,240,209,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Seloharjo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(62,38,216,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Selopamioro':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(227,53,27,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Semawu':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(195,119,225,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Semin':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(173,120,206,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Semoyo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(122,223,86,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Semugih':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(104,212,71,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Serut':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(89,172,240,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Sidoharjo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(65,222,201,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Sigorejo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(203,114,170,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Siraman':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(29,136,202,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Sodo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(236,173,124,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Songbanyu':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(83,36,238,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Songbledeg':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(201,117,43,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Srimartani':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(121,228,38,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Srimulyo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(36,216,180,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Sumberagung':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(208,87,26,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Sumberejo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(224,125,136,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Sumbergiri':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(116,110,204,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Sumberwungu':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(97,152,219,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Tambakromo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(41,222,180,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Tancep':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(224,71,112,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Tegalrejo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(226,163,28,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Tepus':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(168,114,230,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Terbah':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(43,166,200,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Terong':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(201,61,131,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Tileng':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(225,201,62,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Umbulrejo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(121,172,209,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Wareng':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(78,120,227,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Watugajah':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(103,76,210,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Watusigar':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(218,99,163,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Wiladeg':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(52,201,224,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Wonosari':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(189,130,237,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Wukirharjo':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(206,111,134,0.365)',
+                interactive: true,
+            }
+                    break;
+                case 'Wunung':
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(226,122,96,0.365)',
+                interactive: true,
+            }
+                    break;
+                default:
+                    return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.365)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,255,255,0.365)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_ADMINISTRASIDESA_AR_25K_1');
+        map.getPane('pane_ADMINISTRASIDESA_AR_25K_1').style.zIndex = 401;
+        map.getPane('pane_ADMINISTRASIDESA_AR_25K_1').style['mix-blend-mode'] = 'normal';
+        var layer_ADMINISTRASIDESA_AR_25K_1 = new L.geoJson(json_ADMINISTRASIDESA_AR_25K_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_ADMINISTRASIDESA_AR_25K_1',
+            layerName: 'layer_ADMINISTRASIDESA_AR_25K_1',
+            pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+            onEachFeature: pop_ADMINISTRASIDESA_AR_25K_1,
+            style: style_ADMINISTRASIDESA_AR_25K_1_0,
+        });
+        bounds_group.addLayer(layer_ADMINISTRASIDESA_AR_25K_1);
+        map.addLayer(layer_ADMINISTRASIDESA_AR_25K_1);
+        function pop_PERSEBARANWISATAGUNUNGKIDULPROVINSIDIY_2(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['X'] !== null ? autolinker.link(feature.properties['X'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Y'] !== null ? autolinker.link(feature.properties['Y'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Lokasi Wisata</th>\
+                        <td class="visible-with-data" id="Lokasi_Wis">' + (feature.properties['Lokasi_Wis'] !== null ? autolinker.link(feature.properties['Lokasi_Wis'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Link Wisata</th>\
+                        <td class="visible-with-data" id="Link_Lokas">' + (feature.properties['Link_Lokas'] !== null ? autolinker.link(feature.properties['Link_Lokas'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Alamat</th>\
+                        <td class="visible-with-data" id="Alamat">' + (feature.properties['Alamat'] !== null ? autolinker.link(feature.properties['Alamat'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Tiket Masuk</th>\
+                        <td class="visible-with-data" id="Tiket_Mauk">' + (feature.properties['Tiket_Mauk'] !== null ? autolinker.link(feature.properties['Tiket_Mauk'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Jam Buka</th>\
+                        <td class="visible-with-data" id="Jam_Buka">' + (feature.properties['Jam_Buka'] !== null ? autolinker.link(feature.properties['Jam_Buka'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Foto</th>\
+                        <td class="visible-with-data" id="Foto">' + (feature.properties['Foto'] !== null ? '<img src="images/' + String(feature.properties['Foto']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_PERSEBARANWISATAGUNUNGKIDULPROVINSIDIY_2_0() {
+            return {
+                pane: 'pane_PERSEBARANWISATAGUNUNGKIDULPROVINSIDIY_2',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/PERSEBARANWISATAGUNUNGKIDULPROVINSIDIY_2.svg',
+            iconSize: [37.24, 37.24]
+        }),
+                interactive: true,
+            }
+        }
+        map.createPane('pane_PERSEBARANWISATAGUNUNGKIDULPROVINSIDIY_2');
+        map.getPane('pane_PERSEBARANWISATAGUNUNGKIDULPROVINSIDIY_2').style.zIndex = 402;
+        map.getPane('pane_PERSEBARANWISATAGUNUNGKIDULPROVINSIDIY_2').style['mix-blend-mode'] = 'normal';
+        var layer_PERSEBARANWISATAGUNUNGKIDULPROVINSIDIY_2 = new L.geoJson(json_PERSEBARANWISATAGUNUNGKIDULPROVINSIDIY_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_PERSEBARANWISATAGUNUNGKIDULPROVINSIDIY_2',
+            layerName: 'layer_PERSEBARANWISATAGUNUNGKIDULPROVINSIDIY_2',
+            pane: 'pane_PERSEBARANWISATAGUNUNGKIDULPROVINSIDIY_2',
+            onEachFeature: pop_PERSEBARANWISATAGUNUNGKIDULPROVINSIDIY_2,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.marker(latlng, style_PERSEBARANWISATAGUNUNGKIDULPROVINSIDIY_2_0(feature));
+            },
+        });
+        var cluster_PERSEBARANWISATAGUNUNGKIDULPROVINSIDIY_2 = new L.MarkerClusterGroup({showCoverageOnHover: false,
+            spiderfyDistanceMultiplier: 2});
+        cluster_PERSEBARANWISATAGUNUNGKIDULPROVINSIDIY_2.addLayer(layer_PERSEBARANWISATAGUNUNGKIDULPROVINSIDIY_2);
+
+        bounds_group.addLayer(layer_PERSEBARANWISATAGUNUNGKIDULPROVINSIDIY_2);
+        cluster_PERSEBARANWISATAGUNUNGKIDULPROVINSIDIY_2.addTo(map);
+        function pop_KULINER_3(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">X</th>\
+                        <td class="visible-with-data" id="X">' + (feature.properties['X'] !== null ? autolinker.link(feature.properties['X'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Y</th>\
+                        <td class="visible-with-data" id="Y">' + (feature.properties['Y'] !== null ? autolinker.link(feature.properties['Y'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Alamat</th>\
+                        <td class="visible-with-data" id="Lokasi_Kul">' + (feature.properties['Lokasi_Kul'] !== null ? autolinker.link(feature.properties['Lokasi_Kul'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Link Lokasi</th>\
+                        <td class="visible-with-data" id="Link_Lokas">' + (feature.properties['Link_Lokas'] !== null ? autolinker.link(feature.properties['Link_Lokas'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Gambar</th>\
+                        <td class="visible-with-data" id="Gambar">' + (feature.properties['Gambar'] !== null ? '<img src="images/' + String(feature.properties['Gambar']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Alamat</th>\
+                        <td class="visible-with-data" id="Alamat">' + (feature.properties['Alamat'] !== null ? autolinker.link(feature.properties['Alamat'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Jam Buka</th>\
+                        <td class="visible-with-data" id="Jam_Buka">' + (feature.properties['Jam_Buka'] !== null ? autolinker.link(feature.properties['Jam_Buka'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_KULINER_3_0() {
+            return {
+                pane: 'pane_KULINER_3',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/KULINER_3.svg',
+            iconSize: [17.479999999999997, 17.479999999999997]
+        }),
+                interactive: true,
+            }
+        }
+        map.createPane('pane_KULINER_3');
+        map.getPane('pane_KULINER_3').style.zIndex = 403;
+        map.getPane('pane_KULINER_3').style['mix-blend-mode'] = 'normal';
+        var layer_KULINER_3 = new L.geoJson(json_KULINER_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_KULINER_3',
+            layerName: 'layer_KULINER_3',
+            pane: 'pane_KULINER_3',
+            onEachFeature: pop_KULINER_3,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.marker(latlng, style_KULINER_3_0(feature));
+            },
+        });
+        var cluster_KULINER_3 = new L.MarkerClusterGroup({showCoverageOnHover: false,
+            spiderfyDistanceMultiplier: 2});
+        cluster_KULINER_3.addLayer(layer_KULINER_3);
+
+        bounds_group.addLayer(layer_KULINER_3);
+        cluster_KULINER_3.addTo(map);
+        function pop_PENGINAPAN_4(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">X</th>\
+                        <td class="visible-with-data" id="X">' + (feature.properties['X'] !== null ? autolinker.link(feature.properties['X'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Y</th>\
+                        <td class="visible-with-data" id="Y">' + (feature.properties['Y'] !== null ? autolinker.link(feature.properties['Y'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Lokasi</th>\
+                        <td class="visible-with-data" id="Lokasi_Pen">' + (feature.properties['Lokasi_Pen'] !== null ? autolinker.link(feature.properties['Lokasi_Pen'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Link Lokasi</th>\
+                        <td class="visible-with-data" id="Link_Lokas">' + (feature.properties['Link_Lokas'] !== null ? autolinker.link(feature.properties['Link_Lokas'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Gambar</th>\
+                        <td class="visible-with-data" id="Gambar">' + (feature.properties['Gambar'] !== null ? '<img src="images/' + String(feature.properties['Gambar']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Alamat</th>\
+                        <td class="visible-with-data" id="Alamat">' + (feature.properties['Alamat'] !== null ? autolinker.link(feature.properties['Alamat'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Harga</th>\
+                        <td class="visible-with-data" id="Harga">' + (feature.properties['Harga'] !== null ? autolinker.link(feature.properties['Harga'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_PENGINAPAN_4_0() {
+            return {
+                pane: 'pane_PENGINAPAN_4',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/PENGINAPAN_4.svg',
+            iconSize: [12.16, 12.16]
+        }),
+                interactive: true,
+            }
+        }
+        map.createPane('pane_PENGINAPAN_4');
+        map.getPane('pane_PENGINAPAN_4').style.zIndex = 404;
+        map.getPane('pane_PENGINAPAN_4').style['mix-blend-mode'] = 'normal';
+        var layer_PENGINAPAN_4 = new L.geoJson(json_PENGINAPAN_4, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_PENGINAPAN_4',
+            layerName: 'layer_PENGINAPAN_4',
+            pane: 'pane_PENGINAPAN_4',
+            onEachFeature: pop_PENGINAPAN_4,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.marker(latlng, style_PENGINAPAN_4_0(feature));
+            },
+        });
+        var cluster_PENGINAPAN_4 = new L.MarkerClusterGroup({showCoverageOnHover: false,
+            spiderfyDistanceMultiplier: 2});
+        cluster_PENGINAPAN_4.addLayer(layer_PENGINAPAN_4);
+
+        bounds_group.addLayer(layer_PENGINAPAN_4);
+        cluster_PENGINAPAN_4.addTo(map);
+        var osmGeocoder = new L.Control.Geocoder({
+            collapsed: true,
+            position: 'topleft',
+            text: 'Search',
+            title: 'Testing'
+        }).addTo(map);
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .className += ' fa fa-search';
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .title += 'Search for a place';
+        var overlaysTree = [
+            {label: '<img src="legend/PENGINAPAN_4.png" /> PENGINAPAN', layer: cluster_PENGINAPAN_4},
+            {label: '<img src="legend/KULINER_3.png" /> KULINER', layer: cluster_KULINER_3},
+            {label: '<img src="legend/PERSEBARANWISATAGUNUNGKIDULPROVINSIDIY_2.png" /> PERSEBARAN WISATA GUNUNG KIDUL, PROVINSI DIY', layer: cluster_PERSEBARANWISATAGUNUNGKIDULPROVINSIDIY_2},
+            {label: 'ADMINISTRASIDESA_AR_25K<br /><table><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Baleharjo0.png" /></td><td>Baleharjo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Balong1.png" /></td><td>Balong</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Banaran2.png" /></td><td>Banaran</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Bandung3.png" /></td><td>Bandung</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Banjarejo4.png" /></td><td>Banjarejo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Banyusoco5.png" /></td><td>Banyusoco</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Basuhan6.png" /></td><td>Basuhan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Bedoyo7.png" /></td><td>Bedoyo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Beji8.png" /></td><td>Beji</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Bejiharjo9.png" /></td><td>Bejiharjo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Bendung10.png" /></td><td>Bendung</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Bendungan11.png" /></td><td>Bendungan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Bleberan12.png" /></td><td>Bleberan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Bogem13.png" /></td><td>Bogem</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Bohol14.png" /></td><td>Bohol</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Botodayaan15.png" /></td><td>Botodayaan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Bulurejo16.png" /></td><td>Bulurejo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Bunder17.png" /></td><td>Bunder</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Burikan18.png" /></td><td>Burikan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Candirejo19.png" /></td><td>Candirejo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Dadapayu20.png" /></td><td>Dadapayu</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Dengok21.png" /></td><td>Dengok</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Dlingo22.png" /></td><td>Dlingo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Dukuh23.png" /></td><td>Dukuh</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Duwet24.png" /></td><td>Duwet</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Gading25.png" /></td><td>Gading</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Gari26.png" /></td><td>Gari</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Gayamharjo27.png" /></td><td>Gayamharjo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Gebangharjo28.png" /></td><td>Gebangharjo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Gedangrejo29.png" /></td><td>Gedangrejo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Gedong30.png" /></td><td>Gedong</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Genjahan31.png" /></td><td>Genjahan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Gentan32.png" /></td><td>Gentan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Gesikan33.png" /></td><td>Gesikan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Getas34.png" /></td><td>Getas</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Giriasih35.png" /></td><td>Giriasih</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Giricahyo36.png" /></td><td>Giricahyo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Giriharjo37.png" /></td><td>Giriharjo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Girijati38.png" /></td><td>Girijati</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Girikerto39.png" /></td><td>Girikerto</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Girimulyo40.png" /></td><td>Girimulyo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Giring41.png" /></td><td>Giring</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Giripanggung42.png" /></td><td>Giripanggung</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Giripurwo43.png" /></td><td>Giripurwo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Girisekar44.png" /></td><td>Girisekar</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Girisuko45.png" /></td><td>Girisuko</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Giritirto46.png" /></td><td>Giritirto</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Giriwungu47.png" /></td><td>Giriwungu</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Glingganggang48.png" /></td><td>Glingganggang</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Gombong49.png" /></td><td>Gombong</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Grogol50.png" /></td><td>Grogol</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Hargomulyo51.png" /></td><td>Hargomulyo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Hargosari52.png" /></td><td>Hargosari</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Jambakan53.png" /></td><td>Jambakan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Jarum54.png" /></td><td>Jarum</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Jatiayu55.png" /></td><td>Jatiayu</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Jatigarang56.png" /></td><td>Jatigarang</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Jatimulyo57.png" /></td><td>Jatimulyo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Jepitu58.png" /></td><td>Jepitu</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Jerukmudel59.png" /></td><td>Jerukmudel</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Jetis60.png" /></td><td>Jetis</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Jogoprayan61.png" /></td><td>Jogoprayan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Joho62.png" /></td><td>Joho</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Jurangjero63.png" /></td><td>Jurangjero</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Kadilanggon64.png" /></td><td>Kadilanggon</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Kaligayam65.png" /></td><td>Kaligayam</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Kalitekuk66.png" /></td><td>Kalitekuk</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Kampung67.png" /></td><td>Kampung</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Kanigoro68.png" /></td><td>Kanigoro</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Karangasem69.png" /></td><td>Karangasem</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Karangawen70.png" /></td><td>Karangawen</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Karangduwet71.png" /></td><td>Karangduwet</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Karangmojo72.png" /></td><td>Karangmojo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Karangrejek73.png" /></td><td>Karangrejek</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Karangsari74.png" /></td><td>Karangsari</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Karangtengah75.png" /></td><td>Karangtengah</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Karangturi76.png" /></td><td>Karangturi</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Karangwuni77.png" /></td><td>Karangwuni</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Katongan78.png" /></td><td>Katongan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Kedungkeris79.png" /></td><td>Kedungkeris</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Kedungpoh80.png" /></td><td>Kedungpoh</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Kelor81.png" /></td><td>Kelor</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Kemadang82.png" /></td><td>Kemadang</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Kemejing83.png" /></td><td>Kemejing</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Kemiri84.png" /></td><td>Kemiri</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Kenteng85.png" /></td><td>Kenteng</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Kepek86.png" /></td><td>Kepek</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Kepuhsari87.png" /></td><td>Kepuhsari</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Kerten88.png" /></td><td>Kerten</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Kragilan89.png" /></td><td>Kragilan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Krajan90.png" /></td><td>Krajan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Krambilsawit91.png" /></td><td>Krambilsawit</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Logandeng92.png" /></td><td>Logandeng</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Mangunan93.png" /></td><td>Mangunan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Melikan94.png" /></td><td>Melikan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Mertelu95.png" /></td><td>Mertelu</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Monggol96.png" /></td><td>Monggol</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Mulusan97.png" /></td><td>Mulusan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Muntuk98.png" /></td><td>Muntuk</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Muulo99.png" /></td><td>Muulo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Natah100.png" /></td><td>Natah</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Nengahan101.png" /></td><td>Nengahan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Ngalang102.png" /></td><td>Ngalang</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Ngandong103.png" /></td><td>Ngandong</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Ngawis104.png" /></td><td>Ngawis</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Ngawu105.png" /></td><td>Ngawu</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Ngeposari106.png" /></td><td>Ngeposari</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Ngerangan107.png" /></td><td>Ngerangan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Ngestirejo108.png" /></td><td>Ngestirejo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Ngipak109.png" /></td><td>Ngipak</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Nglanggeran110.png" /></td><td>Nglanggeran</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Nglegi111.png" /></td><td>Nglegi</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Ngleri112.png" /></td><td>Ngleri</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Nglindur113.png" /></td><td>Nglindur</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Nglipar114.png" /></td><td>Nglipar</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Ngloro115.png" /></td><td>Ngloro</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_NgoroOro116.png" /></td><td>Ngoro-Oro</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Ngunut117.png" /></td><td>Ngunut</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Pagutan118.png" /></td><td>Pagutan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Pampang119.png" /></td><td>Pampang</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Pancarejo120.png" /></td><td>Pancarejo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Paranggupito121.png" /></td><td>Paranggupito</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Parangtritis122.png" /></td><td>Parangtritis</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Pasekan123.png" /></td><td>Pasekan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Patuk124.png" /></td><td>Patuk</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Pengkok125.png" /></td><td>Pengkok</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Pengkol126.png" /></td><td>Pengkol</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Petir127.png" /></td><td>Petir</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Petirsari128.png" /></td><td>Petirsari</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Pilangrejo129.png" /></td><td>Pilangrejo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Piyaman130.png" /></td><td>Piyaman</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Planjan131.png" /></td><td>Planjan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Playen132.png" /></td><td>Playen</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Plembutan133.png" /></td><td>Plembutan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Ponjong134.png" /></td><td>Ponjong</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Pringombo135.png" /></td><td>Pringombo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Pucanganom136.png" /></td><td>Pucanganom</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Pucung137.png" /></td><td>Pucung</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Pulutan138.png" /></td><td>Pulutan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Punduhsari139.png" /></td><td>Punduhsari</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Pundungsari140.png" /></td><td>Pundungsari</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Purwodadi141.png" /></td><td>Purwodadi</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Putat142.png" /></td><td>Putat</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Rejosari143.png" /></td><td>Rejosari</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Salam144.png" /></td><td>Salam</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Sambirejo145.png" /></td><td>Sambirejo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Sampang146.png" /></td><td>Sampang</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Sawahan147.png" /></td><td>Sawahan</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Selang148.png" /></td><td>Selang</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Seloharjo149.png" /></td><td>Seloharjo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Selopamioro150.png" /></td><td>Selopamioro</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Semawu151.png" /></td><td>Semawu</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Semin152.png" /></td><td>Semin</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Semoyo153.png" /></td><td>Semoyo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Semugih154.png" /></td><td>Semugih</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Serut155.png" /></td><td>Serut</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Sidoharjo156.png" /></td><td>Sidoharjo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Sigorejo157.png" /></td><td>Sigorejo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Siraman158.png" /></td><td>Siraman</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Sodo159.png" /></td><td>Sodo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Songbanyu160.png" /></td><td>Songbanyu</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Songbledeg161.png" /></td><td>Songbledeg</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Srimartani162.png" /></td><td>Srimartani</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Srimulyo163.png" /></td><td>Srimulyo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Sumberagung164.png" /></td><td>Sumberagung</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Sumberejo165.png" /></td><td>Sumberejo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Sumbergiri166.png" /></td><td>Sumbergiri</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Sumberwungu167.png" /></td><td>Sumberwungu</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Tambakromo168.png" /></td><td>Tambakromo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Tancep169.png" /></td><td>Tancep</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Tegalrejo170.png" /></td><td>Tegalrejo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Tepus171.png" /></td><td>Tepus</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Terbah172.png" /></td><td>Terbah</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Terong173.png" /></td><td>Terong</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Tileng174.png" /></td><td>Tileng</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Umbulrejo175.png" /></td><td>Umbulrejo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Wareng176.png" /></td><td>Wareng</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Watugajah177.png" /></td><td>Watugajah</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Watusigar178.png" /></td><td>Watusigar</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Wiladeg179.png" /></td><td>Wiladeg</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Wonosari180.png" /></td><td>Wonosari</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Wukirharjo181.png" /></td><td>Wukirharjo</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_Wunung182.png" /></td><td>Wunung</td></tr><tr><td style="text-align: center;"><img src="legend/ADMINISTRASIDESA_AR_25K_1_183.png" /></td><td></td></tr></table>', layer: layer_ADMINISTRASIDESA_AR_25K_1},
+            {label: "OSM Standard", layer: layer_OSMStandard_0},]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: true,
+        });
+        lay.addTo(map);
+        setBounds();
+        var i = 0;
+        layer_ADMINISTRASIDESA_AR_25K_1.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['NAMOBJ'] !== null?String('<div style="color: #323232; font-size: 6pt; font-family: \'Open Sans\', sans-serif;">' + layer.feature.properties['NAMOBJ']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_ADMINISTRASIDESA_AR_25K_1'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        resetLabels([layer_ADMINISTRASIDESA_AR_25K_1]);
+        map.on("zoomend", function(){
+            resetLabels([layer_ADMINISTRASIDESA_AR_25K_1]);
+        });
+        map.on("layeradd", function(){
+            resetLabels([layer_ADMINISTRASIDESA_AR_25K_1]);
+        });
+        map.on("layerremove", function(){
+            resetLabels([layer_ADMINISTRASIDESA_AR_25K_1]);
+        });
+        </script>
+    </body>
+</html>
